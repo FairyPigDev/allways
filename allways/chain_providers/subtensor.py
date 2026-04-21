@@ -1,10 +1,9 @@
-import re
 from hashlib import blake2b
 from typing import Any, Dict, Optional, Tuple
 
 import bittensor as bt
 from substrateinterface import Keypair
-from substrateinterface.utils.ss58 import ss58_encode
+from substrateinterface.utils.ss58 import is_valid_ss58_address, ss58_encode
 
 from allways.chain_providers.base import ChainProvider, ProviderUnreachableError, TransactionInfo
 from allways.chains import CHAIN_TAO, ChainDefinition
@@ -267,11 +266,11 @@ class SubtensorProvider(ChainProvider):
             return 0
 
     def is_valid_address(self, address: str) -> bool:
-        """Validate an SS58 address."""
+        """Validate an SS58 address (format + checksum) for Subtensor."""
+        if not isinstance(address, str) or not address:
+            return False
         try:
-            if not address or len(address) != 48:
-                return False
-            return bool(re.match(r'^[1-9A-HJ-NP-Za-km-z]{48}$', address))
+            return is_valid_ss58_address(address, valid_ss58_format=42)
         except Exception:
             return False
 
